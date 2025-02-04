@@ -1,5 +1,6 @@
 package com.youyou
 
+import java.awt.Color
 import java.io.File
 import javax.imageio.ImageIO
 
@@ -12,8 +13,13 @@ fun main(args: Array<String>) {
 
     val listEnergies = listEnergies(bufferedImage)
 
-    toIntensityBufferedImage(listEnergies, bufferedImage)
-    ImageIO.write(bufferedImage, "png", File(fileOut))
+//    toIntensityBufferedImage(listEnergies, bufferedImage)
 
+    val lowestSeam = generateGraphFindMinSeam(listEnergies)
+    lowestSeam.path.forEach {
+        bufferedImage.setRGB(it.col, it.line, Color.RED.rgb)
+    }
+
+    ImageIO.write(bufferedImage, "png", File(fileOut))
 }
 

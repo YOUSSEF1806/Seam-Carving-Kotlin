@@ -7,58 +7,56 @@ import kotlin.math.sqrt
 
 fun toIntensityBufferedImage(
     listEnergies: List<List<Double>>,
-    bufferedImage: BufferedImage,
+    bufferedImage: BufferedImage
 ) {
     val maxEnergyValue = listEnergies.flatten().max()
-    listEnergies.forEachIndexed { x, energies ->
-        energies.forEachIndexed { y, energy ->
+    listEnergies.forEachIndexed { line, energies ->
+        energies.forEachIndexed { col, energy ->
             val intensity = (255.0 * energy / maxEnergyValue).toInt()
-            bufferedImage.setRGB(x, y, Color(intensity, intensity, intensity).rgb)
+            bufferedImage.setRGB(col, line, Color(intensity, intensity, intensity).rgb)
         }
     }
 }
 
-fun listEnergies(bufferedImage: BufferedImage) = (0 until bufferedImage.width).map { x ->
-    (0 until bufferedImage.height).map { y ->
-        energyPixel(x, y, bufferedImage)
+fun listEnergies(bufferedImage: BufferedImage) = (0 until bufferedImage.height).map { line ->
+    (0 until bufferedImage.width).map { col ->
+        energyPixel(col, line, bufferedImage)
     }
 }
 
-fun energyPixel(x: Int, y: Int, bufferedImage: BufferedImage): Double {
-    val squareXGradient = squareXGradient(x, y, bufferedImage)
-    val squareYGradient = squareYGradient(x, y, bufferedImage)
+fun energyPixel(col: Int, line: Int, bufferedImage: BufferedImage): Double {
+    val squareXGradient = squareXGradient(col, line, bufferedImage)
+    val squareYGradient = squareYGradient(col, line, bufferedImage)
 
     return sqrt(squareXGradient + squareYGradient)
 }
 
-fun squareYGradient(x: Int, y: Int, bufferedImage: BufferedImage): Double {
-    if (y == 0)
-        return squareYGradient(x, y + 1, bufferedImage)
-    if (y == bufferedImage.height - 1)
-        return squareYGradient(x, y - 1, bufferedImage)
+private fun squareYGradient(col: Int, line: Int, bufferedImage: BufferedImage): Double {
+    if (line == 0)
+        return squareYGradient(col, 1, bufferedImage)
+    if (line == bufferedImage.height - 1)
+        return squareYGradient(col, line - 1, bufferedImage)
 
-    val colorNextY = Color(bufferedImage.getRGB(x, y + 1))
-    val colorPreviousY = Color(bufferedImage.getRGB(x, y - 1))
+    val colorNextY = Color(bufferedImage.getRGB(col, line + 1))
+    val colorPreviousY = Color(bufferedImage.getRGB(col, line - 1))
 
-    return listOf(
-        (colorPreviousY.red - colorNextY.red).toDouble(),
-        (colorPreviousY.green - colorNextY.green).toDouble(),
-        (colorPreviousY.blue - colorNextY.blue).toDouble()
-    ).sumOf { it.pow(2) }
+    return squareGradient(colorPreviousY, colorNextY)
 }
 
-fun squareXGradient(x: Int, y: Int, bufferedImage: BufferedImage): Double {
-    if (x == 0)
-        return squareXGradient(1, y, bufferedImage)
-    if (x == bufferedImage.width - 1)
-        return squareXGradient(x - 1, y, bufferedImage)
+private fun squareXGradient(col: Int, line: Int, bufferedImage: BufferedImage): Double {
+    if (col == 0)
+        return squareXGradient(1, line, bufferedImage)
+    if (col == bufferedImage.width - 1)
+        return squareXGradient(col - 1, line, bufferedImage)
 
-    val colorNextX = Color(bufferedImage.getRGB(x + 1, y))
-    val colorPreviousX = Color(bufferedImage.getRGB(x - 1, y))
+    val colorNextX = Color(bufferedImage.getRGB(col + 1, line))
+    val colorPreviousX = Color(bufferedImage.getRGB(col - 1, line))
 
-    return listOf(
-        (colorPreviousX.red - colorNextX.red).toDouble(),
-        (colorPreviousX.green - colorNextX.green).toDouble(),
-        (colorPreviousX.blue - colorNextX.blue).toDouble()
-    ).sumOf { it.pow(2) }
+    return squareGradient(colorPreviousX, colorNextX)
 }
+
+private fun squareGradient(colorPreviousX: Color, colorNextX: Color) = listOf(
+    (colorPreviousX.red - colorNextX.red).toDouble(),
+    (colorPreviousX.green - colorNextX.green).toDouble(),
+    (colorPreviousX.blue - colorNextX.blue).toDouble()
+).sumOf { it.pow(2) }
