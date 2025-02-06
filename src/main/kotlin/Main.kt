@@ -13,9 +13,7 @@ fun main(args: Array<String>) {
 
     val listEnergies = listEnergies(bufferedImage)
 
-//    toIntensityBufferedImage(listEnergies, bufferedImage)
-
-    val lowestSeam = generateGraphFindMinSeam(listEnergies)
+    val lowestSeam = processAndFindMinSeam(listEnergies)
     lowestSeam.path.forEach {
         bufferedImage.setRGB(it.col, it.line, Color.RED.rgb)
     }
