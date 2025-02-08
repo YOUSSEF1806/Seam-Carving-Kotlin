@@ -1,6 +1,7 @@
 package com.youyou
 
 import java.awt.Color
+import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
@@ -11,15 +12,26 @@ fun main(args: Array<String>) {
 
     val bufferedImage = ImageIO.read(File(fileIn))
 
-    val listEnergies = listEnergies(bufferedImage)
-
-//    toIntensityBufferedImage(listEnergies, bufferedImage)
-
-    val lowestSeam = generateGraphFindMinSeam(listEnergies)
-    lowestSeam.path.forEach {
-        bufferedImage.setRGB(it.col, it.line, Color.RED.rgb)
-    }
+//    lowestVerticalSeam(bufferedImage)
+    lowestHorizontalSeam(bufferedImage)
 
     ImageIO.write(bufferedImage, "png", File(fileOut))
+}
+
+private fun lowestVerticalSeam(bufferedImage: BufferedImage) {
+    val listEnergies = listEnergies(bufferedImage)
+
+    val lowestVSeam = processAndFindMinSeam(listEnergies)
+    lowestVSeam.path.forEach {
+        bufferedImage.setRGB(it.col, it.line, Color.RED.rgb)
+    }
+}
+private fun lowestHorizontalSeam(bufferedImage: BufferedImage) {
+    val listEnergies = listEnergiesHorizontal(bufferedImage)
+
+    val lowestHSeam = processAndFindMinSeam(listEnergies)
+    lowestHSeam.path.forEach {
+        bufferedImage.setRGB(it.line, it.col, Color.RED.rgb)
+    }
 }
 
