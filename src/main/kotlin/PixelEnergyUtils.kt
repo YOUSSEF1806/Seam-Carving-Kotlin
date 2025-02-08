@@ -24,6 +24,17 @@ fun listEnergies(bufferedImage: BufferedImage) = (0 until bufferedImage.height).
     }
 }
 
+fun listEnergiesHorizontal(bufferedImage: BufferedImage): List<List<Double>> {
+    val listEnergiesV = listEnergies(bufferedImage)
+    val listEnergiesH = List(listEnergiesV.first().size) { MutableList(listEnergiesV.size) { 0.0 } }
+    listEnergiesV.forEachIndexed { line, energies ->
+        energies.forEachIndexed { col, energy ->
+            listEnergiesH[col][line] = energy
+        }
+    }
+    return listEnergiesH
+}
+
 fun energyPixel(col: Int, line: Int, bufferedImage: BufferedImage): Double {
     val squareXGradient = squareXGradient(col, line, bufferedImage)
     val squareYGradient = squareYGradient(col, line, bufferedImage)
