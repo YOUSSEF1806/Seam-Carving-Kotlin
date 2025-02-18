@@ -1,37 +1,36 @@
 package com.youyou
 
-import java.awt.Color
-import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
+import kotlin.system.measureTimeMillis
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
-// Program params launch example: -in sky.png -out sky_energy.png
+// Program params launch example: -in <input_file> -out <out_file> -width <nb_v_seam> -height <nb_h_seam>
 fun main(args: Array<String>) {
-    val fileIn = args.indexOf("-in").let { args[it + 1] }
-    val fileOut = args.indexOf("-out").let { args[it + 1] }
+    AppParams.validateParams(args)
 
-    val bufferedImage = ImageIO.read(File(fileIn))
+    var bufferedImage = ImageIO.read(File(AppParams.fileIn))
 
-//    lowestVerticalSeam(bufferedImage)
-    lowestHorizontalSeam(bufferedImage)
+    val paramsInRange = AppParams.widthReduc in 1 until bufferedImage.width &&
+            AppParams.heightReduc in 1 until bufferedImage.height
+    if (paramsInRange) {
+        val vProcessTime = measureTimeMillis {
+            bufferedImage = dropNbVSeams(bufferedImage, AppParams.widthReduc)
+        }
+        println("Vertical process Time: ${vProcessTime.toDuration(DurationUnit.MILLISECONDS)}")
 
-    ImageIO.write(bufferedImage, "png", File(fileOut))
-}
+        val hProcessTime = measureTimeMillis {
+            bufferedImage = dropNbHSeams(bufferedImage, AppParams.heightReduc)
+        }
+        println("Horizontal process Time: ${hProcessTime.toDuration(DurationUnit.MILLISECONDS)}")
 
-private fun lowestVerticalSeam(bufferedImage: BufferedImage) {
-    val listEnergies = listEnergies(bufferedImage)
-
-    val lowestVSeam = processAndFindMinSeam(listEnergies)
-    lowestVSeam.path.forEach {
-        bufferedImage.setRGB(it.col, it.line, Color.RED.rgb)
+        ImageIO.write(bufferedImage, "png", File(AppParams.fileOut))
+    }
+    else {
+        println("Error: parameters for -width and -height must be between 1 and <imagesize> - 1")
     }
 }
-private fun lowestHorizontalSeam(bufferedImage: BufferedImage) {
-    val listEnergies = listEnergiesHorizontal(bufferedImage)
 
-    val lowestHSeam = processAndFindMinSeam(listEnergies)
-    lowestHSeam.path.forEach {
-        bufferedImage.setRGB(it.line, it.col, Color.RED.rgb)
-    }
-}
+
 
